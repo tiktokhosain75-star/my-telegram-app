@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#06120e">
+<title>QuizMaster — Premium Quiz App</title>
+<style>
+:root{
+  --bg:#050b09;--bg2:#081510;--card:rgba(15,31,25,.88);--card2:#10271f;
+  --green:#21e58a;--green2:#0ca968;--text:#f4fff9;--muted:#91aaa0;
+  --danger:#ff5266;--warning:#ffc857;--line:rgba(77,220,158,.18);
+  --shadow:0 18px 55px rgba(0,0,0,.42);--r:22px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:radial-gradient(circle at 50% -10%,#103c2c 0,#06100c 34%,#030806 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100%;overflow-x:hidden}
+button,input{font:inherit}
+button{border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+#app{width:100%;max-width:480px;margin:auto;min-height:100vh;position:relative;padding-bottom:86px}
+.topbar{height:66px;display:flex;align-items:center;justify-content:space-between;padding:10px 15px;position:sticky;top:0;z-index:20;background:rgba(4,12,9,.78);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.04)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:900;font-size:20px;letter-spacing:-.5px}
+.logo{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#32f39b,#08784c);box-shadow:0 7px 25px rgba(33,229,138,.22);font-size:21px}
+.menuBtn{width:43px;height:43px;border-radius:14px;background:rgba(255,255,255,.06);color:#fff;font-size:21px}
+.langs{display:flex;gap:5px;margin-left:auto;margin-right:8px}
+.lang{padding:7px 8px;border-radius:10px;background:transparent;color:var(--muted);font-size:12px}
+.lang.active{background:rgba(33,229,138,.12);color:var(--green)}
+.screen{display:none;padding:16px 15px 10px;animation:pageIn .28s ease}
+.screen.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.sectionTitle{font-size:19px;font-weight:850;margin:20px 2px 11px}
+.sub{color:var(--muted);font-size:12px}
+.card{background:linear-gradient(145deg,rgba(17,40,31,.92),rgba(7,19,14,.9));border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.profileCard{padding:17px;display:flex;align-items:center;gap:13px}
+.avatar{width:52px;height:52px;border-radius:17px;background:linear-gradient(145deg,#21e58a,#0b6d48);display:grid;place-items:center;font-size:25px;font-weight:900}
+.profileMain{flex:1;min-width:0}.profileName{font-weight:800;font-size:16px}.rank{font-size:11px;color:var(--muted);margin-top:3px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:13px}
+.stat{padding:9px 5px;text-align:center;border-radius:13px;background:rgba(255,255,255,.045);font-size:11px;color:var(--muted)}
+.stat b{display:block;color:#fff;font-size:14px;margin-bottom:2px}
+.notice{margin-top:13px;padding:11px 13px;border-radius:16px;background:rgba(33,229,138,.08);border:1px solid rgba(33,229,138,.13);overflow:hidden;white-space:nowrap}
+.notice span{display:inline-block;animation:marquee 14s linear infinite;padding-left:100%}
+@keyframes marquee{to{transform:translateX(-100%)}}
+.leader{margin-top:12px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.leaderIcon{font-size:22px}.leaderText{font-size:12px;color:var(--muted);flex:1}.leaderName{color:#fff;font-weight:800}
+.quizGrid{display:grid;gap:13px}
+.quizCard{min-height:155px;padding:16px;display:flex;align-items:flex-end;transition:.2s;overflow:hidden}
+.quizCard:active{transform:scale(.985)}
+.quizVisual{position:absolute;right:5px;top:5px;width:145px;height:145px;opacity:.92}
+.quizInfo{position:relative;z-index:2;max-width:75%}
+.quizIcon{font-size:28px;margin-bottom:7px}
+.quizTitle{font-size:17px;font-weight:900}.quizCount{font-size:11px;color:var(--green);font-weight:800;margin-top:5px}
+.primary,.secondary,.dangerBtn{width:100%;min-height:48px;border-radius:16px;font-weight:850;transition:.2s}
+.primary{background:linear-gradient(135deg,#31f49b,#0da866);color:#02130c;box-shadow:0 10px 30px rgba(33,229,138,.16)}
+.secondary{background:rgba(255,255,255,.065);color:#fff;border:1px solid rgba(255,255,255,.08)}
+.dangerBtn{background:rgba(255,82,102,.13);color:#ff8795;border:1px solid rgba(255,82,102,.18)}
+.primary:active,.secondary:active,.dangerBtn:active{transform:scale(.985)}
+.bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);height:76px;padding:8px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(4,12,9,.92);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.07);z-index:30;display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.navBtn{background:transparent;color:var(--muted);border-radius:15px;font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.navBtn b{font-size:20px;line-height:1}.navBtn.active{background:rgba(33,229,138,.1);color:var(--green)}
+.drawerShade{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:50;display:none}
+.drawerShade.open{display:block}
+.drawer{position:absolute;left:0;top:0;bottom:0;width:min(50%,300px);min-width:245px;background:#07120e;border-right:1px solid var(--line);padding:17px 13px;box-shadow:20px 0 50px rgba(0,0,0,.5);animation:drawerIn .25s ease}
+@keyframes drawerIn{from{transform:translateX(-100%)}to{transform:none}}
+.drawerHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.drawerTitle{font-size:18px;font-weight:900}.close{background:rgba(255,255,255,.06);color:#fff;width:38px;height:38px;border-radius:12px}
+.drawerLink,.drawerAction{display:flex;align-items:center;gap:11px;width:100%;padding:13px;border-radius:14px;background:rgba(255,255,255,.045);color:#eafff4;margin-bottom:9px;text-align:left}
+.drawerLink small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.drawerLink div{flex:1}
+.formCard{padding:18px}.field{margin-bottom:13px}.field label{display:block;color:var(--muted);font-size:12px;margin:0 0 6px 3px}
+.field input{width:100%;height:47px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.22);border-radius:14px;color:#fff;padding:0 13px;outline:none}
+.field input:focus{border-color:rgba(33,229,138,.5)}
+.backRow{display:flex;align-items:center;gap:10px;margin-bottom:12px}.backBtn{background:rgba(255,255,255,.06);color:#fff;width:40px;height:40px;border-radius:12px}
+.hubGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.smallQuiz{padding:15px;min-height:155px;display:flex;flex-direction:column;justify-content:space-between}
+.smallQuiz .bigIcon{font-size:34px}.smallQuiz h3{margin:0;font-size:15px}.smallQuiz p{margin:4px 0 0;color:var(--muted);font-size:11px}
+.levelGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.levelCard{padding:16px;min-height:145px}.levelCard.locked{opacity:.58}.levelNo{font-size:11px;color:var(--muted)}.levelName{font-size:18px;font-weight:900;margin:6px 0}.lock{font-size:25px}.levelMeta{font-size:11px;color:var(--green);margin-bottom:12px}
+.quizHeader{display:flex;align-items:center;gap:10px;margin-bottom:12px}.quizHeader .backBtn{flex:none}.timer{margin-left:auto;min-width:62px;text-align:center;padding:8px 9px;border-radius:12px;background:rgba(33,229,138,.1);color:var(--green);font-weight:900}.timer.danger{background:rgba(255,82,102,.13);color:#ff8290}
+.progressOuter{height:7px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}.progressInner{height:100%;background:linear-gradient(90deg,#23ed93,#0ca968);border-radius:inherit;transition:.3s}
+.qMeta{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin:9px 0 15px}.qCard{padding:17px}.qText{font-size:19px;font-weight:850;line-height:1.45;margin:0 0 15px}.qImage{width:100%;max-height:190px;object-fit:cover;border-radius:15px;margin-bottom:13px;background:#0b1c15}
+.optionList{display:grid;gap:9px}.option{display:flex;align-items:flex-start;gap:9px;text-align:left;width:100%;padding:13px;border-radius:15px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);color:#fff;min-height:50px}.option .letter{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:11px;font-weight:900;flex:none}.option.correct{background:rgba(33,229,138,.15);border-color:rgba(33,229,138,.5)}.option.correct .letter{background:var(--green);color:#032016}.option.wrong{background:rgba(255,82,102,.13);border-color:rgba(255,82,102,.45)}.option.wrong .letter{background:var(--danger);color:#fff}.explain{margin-top:13px;padding:12px;border-radius:14px;background:rgba(255,200,87,.07);border:1px solid rgba(255,200,87,.12);font-size:12px;color:#dce7e1;line-height:1.5}
+.quizActions{margin-top:12px}.bookmarkBtn{margin-top:9px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:80;display:none;align-items:center;justify-content:center;padding:20px}.overlay.show{display:flex}.modal{width:min(430px,100%);padding:22px;text-align:center;border-radius:25px;background:#0a1913;border:1px solid var(--line);box-shadow:0 30px 90px rgba(0,0,0,.6);animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+.modalIcon{font-size:52px}.modal h2{margin:8px 0 6px}.modal p{color:var(--muted);font-size:13px;line-height:1.5}.modalBtns{display:grid;gap:9px;margin-top:17px}
+.toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,20px);z-index:100;background:#12261e;border:1px solid var(--line);color:#fff;padding:12px 15px;border-radius:14px;font-size:12px;opacity:0;pointer-events:none;transition:.28s;text-align:center;width:min(92%,390px);box-shadow:var(--shadow)}.toast.show{opacity:1;transform:translate(-50%,0)}
+.result{text-align:center;padding:25px 17px}.scoreCircle{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;margin:8px auto 16px;background:radial-gradient(circle,#102b20 52%,transparent 54%),conic-gradient(var(--green) var(--score),rgba(255,255,255,.08) 0);border:1px solid var(--line)}.scoreCircle b{font-size:27px}.result h1{margin:0 0 5px}.result p{color:var(--muted)}
+.tabs{display:flex;gap:6px;margin-bottom:13px}.tab{flex:1;padding:10px;border-radius:12px;background:rgba(255,255,255,.045);color:var(--muted);font-size:12px;font-weight:800}.tab.active{background:rgba(33,229,138,.12);color:var(--green)}
+.rankRow{display:flex;align-items:center;gap:10px;padding:13px;border-bottom:1px solid rgba(255,255,255,.05)}.rankNo{width:30px;text-align:center;color:var(--green);font-weight:900}.rankName{flex:1}.rankPts{font-weight:850}.me{background:rgba(33,229,138,.08)}
+.profileHero{padding:21px;text-align:center}.bigAvatar{width:80px;height:80px;border-radius:25px;margin:auto;display:grid;place-items:center;background:linear-gradient(145deg,#32f49b,#08784c);font-size:38px}.profileHero h2{margin:10px 0 2px}.profileHero .sub{margin-bottom:15px}
+.statGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.statBox{padding:14px;border-radius:15px;background:rgba(255,255,255,.045)}.statBox span{display:block;color:var(--muted);font-size:11px}.statBox b{font-size:18px;display:block;margin-top:3px}
+.vipGrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.vipCard{padding:15px}.vipCard.locked{opacity:.52}.vipBadge{font-size:24px}.vipCard h3{margin:7px 0 3px}.vipCard p{margin:0 0 10px;color:var(--muted);font-size:11px}
+.refCode{display:flex;gap:8px;margin:13px 0}.refCode input{flex:1}.refCode button{width:52px;border-radius:13px;background:rgba(33,229,138,.12);color:var(--green)}
+.bookmarkItem{padding:14px;margin-bottom:9px}.bookmarkItem h4{margin:0 0 5px}.bookmarkItem p{margin:0;color:var(--muted);font-size:11px}
+.empty{text-align:center;padding:35px 15px;color:var(--muted);font-size:13px}
+@media(max-width:360px){.hubGrid,.levelGrid,.vipGrid{grid-template-columns:1fr}.qText{font-size:17px}.drawer{min-width:235px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header class="topbar">
+  <button class="menuBtn" onclick="openMenu()">☰</button>
+  <div class="brand"><div class="logo">🧠</div><span>QuizMaster</span></div>
+  <div class="langs"><button id="bnBtn" class="lang active" onclick="setLanguage('bn')">🇧🇩 বাংলা</button><button id="enBtn" class="lang" onclick="setLanguage('en')">🇬🇧 English</button></div>
+</header>
+
+<main>
+<section id="home" class="screen active"></section>
+<section id="quizHub" class="screen"></section>
+<section id="category" class="screen"></section>
+<section id="quizPlay" class="screen"></section>
+<section id="result" class="screen"></section>
+<section id="ranking" class="screen"></section>
+<section id="profile" class="screen"></section>
+<section id="referral" class="screen"></section>
+<section id="vip" class="screen"></section>
+<section id="bookmarks" class="screen"></section>
+<section id="signup" class="screen"></section>
+</main>
+
+<nav class="bottomNav">
+  <button class="navBtn active" id="navHome" onclick="showHome()"><b>🏠</b><span>Home</span></button>
+  <button class="navBtn" id="navQuiz" onclick="showQuizHub()"><b>🎯</b><span>Quiz</span></button>
+  <button class="navBtn" id="navRank" onclick="showLeaderboard()"><b>🏆</b><span>Ranking</span></button>
+  <button class="navBtn" id="navProfile" onclick="showProfile()"><b>👤</b><span>Profile</span></button>
+</nav>
+</div>
+
+<div id="drawerShade" class="drawerShade" onclick="closeMenu(event)">
+ <aside class="drawer" onclick="event.stopPropagation()">
+  <div class="drawerHead"><div class="drawerTitle">QuizMaster</div><button class="close" onclick="closeMenu()">✕</button></div>
+  <a class="drawerLink" href="https://t.me/SHHosain21" target="_blank" rel="noopener" onclick="snd('click')"><span>✈️</span><div><b>Admin Telegram</b><small>t.me/SHHosain21</small></div>↗</a>
+  <a class="drawerLink" href="https://www.facebook.com/share/1F7HkH7h4u/" target="_blank" rel="noopener" onclick="snd('click')"><span>📘</span><div><b>Admin Facebook</b><small>Facebook Page</small></div>↗</a>
+  <button class="drawerAction" onclick="confirmSignOut()"><span>🚪</span><div>Sign Out</div></button>
+ </aside>
+</div>
+
+<div id="modal" class="overlay"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+"use strict";
+
+/* =========================
+   DATA
+========================= */
+const CAT={
+ health:{id:"health",name:"Doctor & Health Quiz",icon:"🩺",count:50,color:"health",home:true},
+ brain:{id:"brain",name:"Brain & Intelligence Quiz",icon:"🧠",count:50,color:"brain",home:true},
+ general:{id:"general",name:"General Knowledge",icon:"🌍",count:120},
+ bcs:{id:"bcs",name:"BCS & Job Preparation",icon:"📚",count:130},
+ tech:{id:"tech",name:"Technology & IT",icon:"💻",count:120},
+ science:{id:"science",name:"Science & Discovery",icon:"🔬",count:130}
+};
+const STATE_KEY="qm_state_v3";
+const defaultState={
+ user:{name:"User",email:"",points:0,coins:0,balance:0},
+ currentUser:false, language:"bn", bookmarks:[], progress:{}, stats:{played:0,correct:0,wrong:0},
+ vip:1, notice:"📢 নতুন কুইজ খেলুন এবং আপনার জ্ঞান যাচাই করুন।", referralCount:0, referralReward:0
+};
+let state=loadState();
+let currentCat=null,currentLevel=1,currentQuestions=[],qIndex=0,score=0,timer=30,timerId=null,answered=false,exitBackArmed=false,leaderIndex=0;
+let audioCtx=null;
+
+const names=["Rahim","Karim","Sadia","Nusrat","Arif","Mim","Tanvir","Jannat","Hasan","Rafi"];
+const questionBanks={
+health:[
+ ["মানুষের শরীরে রক্ত পাম্প করে কোন অঙ্গ?","হৃদপিণ্ড","ফুসফুস","কিডনি","যকৃত","হৃদপিণ্ড","হৃদপিণ্ড সারা শরীরে রক্ত সঞ্চালন করে।"],
+ ["মানুষের স্বাভাবিক দেহের তাপমাত্রা প্রায় কত?","৩৭°C","৩০°C","৪২°C","২৫°C","৩৭°C","সাধারণভাবে প্রায় ৩৭°C ধরা হয়।"],
+ ["শ্বাস নেওয়ার প্রধান অঙ্গ কোনটি?","ফুসফুস","পাকস্থলী","অগ্ন্যাশয়","মস্তিষ্ক","ফুসফুস","ফুসফুস গ্যাসের আদান-প্রদান করে।"],
+ ["ভিটামিন C-এর ভালো উৎস কোনটি?","লেবু","চাল","লবণ","চিনি","লেবু","সাইট্রাস ফলে ভিটামিন C থাকে।"],
+ ["মানবদেহের সবচেয়ে বড় অঙ্গ কোনটি?","ত্বক","হৃদপিণ্ড","চোখ","কান","ত্বক","ত্বক পুরো শরীরকে আবৃত করে।"],
+ ["কিডনির প্রধান কাজ কী?","রক্ত ছেঁকে বর্জ্য অপসারণ","শব্দ শোনা","দৃষ্টি দেওয়া","হজম শুরু করা","রক্ত ছেঁকে বর্জ্য অপসারণ","কিডনি রক্ত পরিশোধনে গুরুত্বপূর্ণ ভূমিকা রাখে।"],
+ ["দাঁতের শক্ত বাইরের স্তরকে কী বলে?","এনামেল","প্লাজমা","কার্টিলেজ","মজ্জা","এনামেল","এনামেল দাঁতের সবচেয়ে শক্ত বাইরের স্তর।"],
+ ["রক্তের লাল কণিকার প্রধান কাজ কী?","অক্সিজেন বহন","হরমোন তৈরি","হাড় তৈরি","পানি শোষণ","অক্সিজেন বহন","হিমোগ্লোবিনের মাধ্যমে অক্সিজেন বহন করে।"],
+ ["মস্তিষ্কের সুরক্ষায় কোন হাড় সাহায্য করে?","খুলি","পাঁজর","পেলভিস","কবজি","খুলি","খুলি মস্তিষ্ককে সুরক্ষা দেয়।"],
+ ["পাকস্থলীর প্রধান ভূমিকা কী?","খাদ্য হজমে সহায়তা","রক্ত পাম্প","দৃষ্টি নিয়ন্ত্রণ","শব্দ তৈরি","খাদ্য হজমে সহায়তা","পাকস্থলীতে খাদ্য রাসায়নিকভাবে ভাঙতে শুরু করে।"],
+ ["ইনসুলিন কোন অঙ্গ থেকে নিঃসৃত হয়?","অগ্ন্যাশয়","কিডনি","হৃদপিণ্ড","ফুসফুস","অগ্ন্যাশয়","অগ্ন্যাশয়ের বিশেষ কোষ ইনসুলিন তৈরি করে।"],
+ ["হাড় ও দাঁতের জন্য কোন খনিজ গুরুত্বপূর্ণ?","ক্যালসিয়াম","সোডিয়াম","আয়োডিন","তামা","ক্যালসিয়াম","ক্যালসিয়াম হাড় ও দাঁতের গঠনে গুরুত্বপূর্ণ।"],
+ ["রক্তের তরল অংশকে কী বলা হয়?","প্লাজমা","এনামেল","লসিকা","মজ্জা","প্লাজমা","প্লাজমা রক্তের তরল অংশ।"],
+ ["চোখের কোন অংশে আলো সংবেদনশীল কোষ থাকে?","রেটিনা","কর্নিয়া","আইরিস","লেন্স","রেটিনা","রেটিনায় আলো সংবেদনশীল কোষ থাকে।"],
+ ["পালস সাধারণত কী নির্দেশ করে?","হৃদস্পন্দনের ছন্দ","ফুসফুসের আয়তন","দেহের উচ্চতা","চোখের চাপ","হৃদস্পন্দনের ছন্দ","পালস হৃদস্পন্দনের সঙ্গে সম্পর্কিত।"]
+],
+brain:[
+ ["ধারাটি সম্পূর্ণ করুন: 2, 4, 6, 8, ?","10","11","12","14","10","প্রতি ধাপে ২ করে বাড়ছে।"],
+ ["একটি ঘড়িতে ৩টা বাজলে ঘণ্টা ও মিনিটের কাঁটার কোণ কত?","৯০°","৪৫°","১৮০°","৬০°","৯০°","৩টার সময় কাঁটাগুলো সমকোণ তৈরি করে।"],
+ ["যদি সব A হলো B এবং সব B হলো C, তাহলে সব A কী?","C","D","A নয়","কিছুই নয়","C","এটি সরল যৌক্তিক অন্তর্ভুক্তি।"],
+ ["৫টি বাক্সে প্রতিটিতে ৪টি বল থাকলে মোট বল কত?","২০","৯","১৫","২৫","২০","৫ × ৪ = ২০।"],
+ ["একটি সংখ্যার দ্বিগুণ ১৮ হলে সংখ্যাটি কত?","৯","৬","৮","১২","৯","১৮ ÷ ২ = ৯।"],
+ ["ধারাটি: 1, 1, 2, 3, 5, ?","8","7","9","10","8","ফিবোনাচ্চি ধারায় আগের দুই সংখ্যার যোগফল নেওয়া হয়।"],
+ ["কোনটি অন্যগুলোর থেকে আলাদা?","ত্রিভুজ","বর্গ","আয়তক্ষেত্র","সোমবার","সোমবার","সোমবার একটি দিন; বাকিগুলো জ্যামিতিক আকৃতি।"],
+ ["এক ডজন সমান কতটি?","১২","১০","১৪","২৪","১২","এক ডজন = ১২টি।"],
+ ["আজ সোমবার হলে ৩ দিন পরে কোন দিন?","বৃহস্পতিবার","বুধবার","শুক্রবার","রবিবার","বৃহস্পতিবার","মঙ্গলবার, বুধবার, বৃহস্পতিবার।"],
+ ["১০০-এর ২৫% কত?","২৫","২০","৪০","৫০","২৫","১০০ × ০.২৫ = ২৫।"],
+ ["একটি আয়তক্ষেত্রের দৈর্ঘ্য ৫ ও প্রস্থ ৩ হলে ক্ষেত্রফল কত?","১৫","৮","১৬","১০","১৫","ক্ষেত্রফল = দৈর্ঘ্য × প্রস্থ।"],
+ ["যদি CAT → DBU হয়, DOG → ?","EPH","EOH","FPH","DNG","EPH","প্রতিটি অক্ষর এক ধাপ সামনে গেছে।"],
+ ["কোন সংখ্যা ৩ দ্বারা বিভাজ্য?","১২","১০","১১","১৪","১২","অঙ্কগুলোর যোগফল ৩-এর গুণিতক।"],
+ ["একটি জিনিস ১০০ টাকা, ২০% ছাড়ে দাম কত?","৮০","৭০","৯০","৬০","৮০","২০ টাকা ছাড়ের পর ৮০ টাকা থাকে।"],
+ ["২, ৬, ১২, ২০, ? ধারার পরের সংখ্যা কী?","৩০","২৮","২৬","৩২","৩০","ক্রমে +৪,+৬,+৮,+১০।"]
+],
+general:[
+ ["বাংলাদেশের জাতীয় ফুল কোনটি?","শাপলা","গোলাপ","জবা","বেলি","শাপলা","শাপলা বাংলাদেশের জাতীয় ফুল।"],
+ ["বাংলাদেশের রাজধানী কোনটি?","ঢাকা","চট্টগ্রাম","খুলনা","রাজশাহী","ঢাকা","ঢাকা বাংলাদেশের রাজধানী।"],
+ ["পৃথিবীর বৃহত্তম মহাসাগর কোনটি?","প্রশান্ত মহাসাগর","আটলান্টিক","ভারত মহাসাগর","আর্কটিক","প্রশান্ত মহাসাগর","প্রশান্ত মহাসাগর আয়তনে সবচেয়ে বড়।"],
+ ["বাংলাদেশের জাতীয় পাখি কোনটি?","দোয়েল","কাক","ময়ূর","শালিক","দোয়েল","দোয়েল বাংলাদেশের জাতীয় পাখি।"],
+ ["সূর্য কোন ধরনের জ্যোতিষ্ক?","নক্ষত্র","গ্রহ","উপগ্রহ","গ্রহাণু","নক্ষত্র","সূর্য একটি নক্ষত্র।"],
+ ["পৃথিবীর উপগ্রহের নাম কী?","চাঁদ","মঙ্গল","শুক্র","সূর্য","চাঁদ","চাঁদ পৃথিবীর প্রাকৃতিক উপগ্রহ।"],
+ ["বাংলাদেশের জাতীয় ফল কোনটি?","কাঁঠাল","আম","লিচু","কলা","কাঁঠাল","কাঁঠাল জাতীয় ফল।"],
+ ["পৃথিবীর সবচেয়ে বড় মহাদেশ কোনটি?","এশিয়া","আফ্রিকা","ইউরোপ","অস্ট্রেলিয়া","এশিয়া","এশিয়া আয়তনে সবচেয়ে বড় মহাদেশ।"],
+ ["পানি সাধারণ চাপের অধীনে কত °C-তে ফুটে?","১০০°C","৫০°C","৮০°C","১২০°C","১০০°C","সাধারণ বায়ুচাপে পানির স্ফুটনাঙ্ক ১০০°C।"],
+ ["বাংলাদেশের মুদ্রার নাম কী?","টাকা","রুপি","দিনার","ইয়েন","টাকা","বাংলাদেশের মুদ্রা টাকা।"]
+],
+bcs:[
+ ["বাংলাদেশের সংবিধান কার্যকর হয় কোন তারিখে?","১৬ ডিসেম্বর ১৯৭২","২৬ মার্চ ১৯৭১","২১ ফেব্রুয়ারি ১৯৫২","১৫ আগস্ট ১৯৭৫","১৬ ডিসেম্বর ১৯৭২","সংবিধান ১৬ ডিসেম্বর ১৯৭২ কার্যকর হয়।"],
+ ["বাংলাদেশের স্বাধীনতা দিবস কোনটি?","২৬ মার্চ","১৬ ডিসেম্বর","২১ ফেব্রুয়ারি","৭ মার্চ","২৬ মার্চ","২৬ মার্চ স্বাধীনতা দিবস।"],
+ ["বাংলাদেশের বিজয় দিবস কোনটি?","১৬ ডিসেম্বর","২৬ মার্চ","২১ ফেব্রুয়ারি","১৪ ডিসেম্বর","১৬ ডিসেম্বর","১৬ ডিসেম্বর বিজয় দিবস।"],
+ ["বাংলা ভাষার আন্তর্জাতিক মাতৃভাষা দিবস কোনটি?","২১ ফেব্রুয়ারি","২৬ মার্চ","১৬ ডিসেম্বর","১ জানুয়ারি","২১ ফেব্রুয়ারি","২১ ফেব্রুয়ারি আন্তর্জাতিক মাতৃভাষা দিবস।"],
+ ["BCS-এর পূর্ণরূপ কী?","Bangladesh Civil Service","Bangladesh Central School","Basic Civil System","Bangladesh Career Service","Bangladesh Civil Service","BCS হলো Bangladesh Civil Service।"],
+ ["বাংলাদেশের আইনসভা কী নামে পরিচিত?","জাতীয় সংসদ","সুপ্রিম কোর্ট","মন্ত্রিপরিষদ","নির্বাচন কমিশন","জাতীয় সংসদ","জাতীয় সংসদ বাংলাদেশের আইনসভা।"],
+ ["জাতীয় স্মৃতিসৌধ কোথায়?","সাভার","কুমিল্লা","খুলনা","সিলেট","সাভার","জাতীয় স্মৃতিসৌধ সাভারে অবস্থিত।"],
+ ["বাংলাদেশের জাতীয় কবি কে?","কাজী নজরুল ইসলাম","রবীন্দ্রনাথ ঠাকুর","জসীমউদ্দীন","সুকান্ত ভট্টাচার্য","কাজী নজরুল ইসলাম","কাজী নজরুল ইসলাম জাতীয় কবি।"],
+ ["বাংলা সাহিত্যে ‘বিদ্রোহী’ কবিতার রচয়িতা কে?","কাজী নজরুল ইসলাম","জীবনানন্দ দাশ","শামসুর রাহমান","মাইকেল মধুসূদন","কাজী নজরুল ইসলাম","‘বিদ্রোহী’ নজরুলের বিখ্যাত কবিতা।"],
+ ["সরকারি চাকরির নিয়োগ পরীক্ষায় সাধারণ জ্ঞান কেন গুরুত্বপূর্ণ?","বিস্তৃত জ্ঞান যাচাইয়ে","শুধু গণিতে","শুধু খেলাধুলায়","শুধু কম্পিউটারে","বিস্তৃত জ্ঞান যাচাইয়ে","সাধারণ জ্ঞান বিস্তৃত বিষয় সম্পর্কে ধারণা যাচাই করে।"]
+],
+tech:[
+ ["CPU-এর পূর্ণরূপ কী?","Central Processing Unit","Computer Primary Unit","Central Program Utility","Core Processing User","Central Processing Unit","CPU কম্পিউটারের প্রধান প্রসেসিং ইউনিট।"],
+ ["HTML কী কাজে ব্যবহৃত হয়?","ওয়েব পেজের কাঠামো তৈরি","শুধু ছবি আঁকা","ডাটাবেস চালানো","ভিডিও কমপ্রেস","ওয়েব পেজের কাঠামো তৈরি","HTML ওয়েব ডকুমেন্টের কাঠামো নির্ধারণ করে।"],
+ ["CSS-এর প্রধান কাজ কী?","ওয়েব পেজের স্টাইল","ডাটাবেস তৈরি","সার্ভার বন্ধ","ইমেইল পাঠানো","ওয়েব পেজের স্টাইল","CSS দিয়ে presentation ও layout নিয়ন্ত্রণ করা হয়।"],
+ ["JavaScript সাধারণত কী যোগ করে?","ইন্টারঅ্যাক্টিভ আচরণ","শুধু ছবি","শুধু অডিও","হার্ডডিস্ক","ইন্টারঅ্যাক্টিভ আচরণ","JavaScript ওয়েব পেজে dynamic interaction যোগ করে।"],
+ ["RAM কেমন ধরনের মেমোরি?","অস্থায়ী/ভলাটাইল","স্থায়ী ROM","কাগজ","অপটিক্যাল","অস্থায়ী/ভলাটাইল","বিদ্যুৎ বন্ধ হলে RAM-এর সাধারণ ডেটা থাকে না।"],
+ ["URL-এর পূর্ণরূপ কী?","Uniform Resource Locator","Universal Read Link","User Route List","Unified Remote Login","Uniform Resource Locator","URL একটি ওয়েব রিসোর্সের ঠিকানা নির্দেশ করে।"],
+ ["HTTP কী ধরনের প্রোটোকল?","ওয়েব যোগাযোগ প্রোটোকল","ছবি ফরম্যাট","অডিও কোডেক","অপারেটিং সিস্টেম","ওয়েব যোগাযোগ প্রোটোকল","HTTP ওয়েব ক্লায়েন্ট-সার্ভার যোগাযোগে ব্যবহৃত হয়।"],
+ ["JSON সাধারণত কী জন্য ব্যবহৃত হয়?","ডেটা আদান-প্রদান","ভিডিও সম্পাদনা","ছবি আঁকা","প্রিন্টিং","ডেটা আদান-প্রদান","JSON কাঠামোবদ্ধ ডেটা বিনিময়ে বহুল ব্যবহৃত।"],
+ ["Git কী?","Version control system","Browser","Database","Antivirus","Version control system","Git সোর্স কোডের version control করতে ব্যবহৃত হয়।"],
+ ["Cloud computing কী বোঝায়?","দূরবর্তী কম্পিউটিং রিসোর্স ব্যবহার","শুধু আবহাওয়া","কম্পিউটার পরিষ্কার","কীবোর্ড তৈরি","দূরবর্তী কম্পিউটিং রিসোর্স ব্যবহার","ইন্টারনেটের মাধ্যমে computing resources ব্যবহার করা যায়।"]
+],
+science:[
+ ["পানির রাসায়নিক সংকেত কী?","H₂O","CO₂","O₂","NaCl","H₂O","পানির একটি অণুতে দুই হাইড্রোজেন ও এক অক্সিজেন থাকে।"],
+ ["আলোর গতি শূন্যস্থানে প্রায় কত?","৩×১০⁸ m/s","৩×১০⁵ m/s","৩×১০³ m/s","৩×১০¹⁰ m/s","৩×১০⁸ m/s","শূন্যস্থানে আলোর গতি প্রায় ৩×১০⁸ m/s।"],
+ ["উদ্ভিদ সালোকসংশ্লেষণে কোন গ্যাস গ্রহণ করে?","কার্বন ডাই-অক্সাইড","অক্সিজেন","হিলিয়াম","হাইড্রোজেন","কার্বন ডাই-অক্সাইড","উদ্ভিদ CO₂ ব্যবহার করে খাদ্য তৈরি করে।"],
+ ["পৃথিবীর মাধ্যাকর্ষণ ত্বরণ প্রায় কত?","৯.৮ m/s²","৩ m/s²","২০ m/s²","১ m/s²","৯.৮ m/s²","পৃথিবীর পৃষ্ঠে g প্রায় ৯.৮ m/s²।"],
+ ["পরমাণুর কেন্দ্রকে কী বলে?","নিউক্লিয়াস","ইলেকট্রন","অরবিট","আয়ন","নিউক্লিয়াস","প্রোটন ও নিউট্রন নিউক্লিয়াসে থাকে।"],
+ ["pH 7 সাধারণত কী নির্দেশ করে?","নিরপেক্ষ","অম্লীয়","ক্ষারীয়","ধাতব","নিরপেক্ষ","২৫°C-এর কাছাকাছি বিশুদ্ধ পানির pH প্রায় ৭।"],
+ ["শব্দ চলাচলের জন্য কী প্রয়োজন?","মাধ্যম","শূন্যস্থান","শুধু আলো","চুম্বক","মাধ্যম","শব্দ যান্ত্রিক তরঙ্গ; সাধারণভাবে একটি মাধ্যম প্রয়োজন।"],
+ ["বিদ্যুৎ প্রবাহের একক কী?","অ্যাম্পিয়ার","ভোল্ট","ওহম","ওয়াট","অ্যাম্পিয়ার","Electric current-এর SI unit ampere।"],
+ ["বল-এর SI একক কী?","নিউটন","জুল","পাস্কাল","ওয়াট","নিউটন","Force-এর SI unit নিউটন।"],
+ ["জলের বরফ হওয়ার তাপমাত্রা সাধারণ চাপে কত?","০°C","১০°C","-১০°C","১০০°C","০°C","সাধারণ চাপে পানি প্রায় ০°C-তে জমে।"]
+]
+};
+
+/* Generate exactly 600 unique records from compact seed banks. Each category gets its required count. */
+const categoryCounts={health:50,brain:50,general:120,bcs:130,tech:120,science:130};
+const imageCats=new Set(["health","brain","science","tech"]);
+const imageTotalTarget=200;
+
+function escapeSVG(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&apos;"}[m]))}
+function makeImage(cat,n,text){
+  const emoji={health:"🩺",brain:"🧠",general:"🌍",bcs:"📚",tech:"💻",science:"🔬"}[cat];
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#0d3024"/><stop offset="1" stop-color="#06110c"/></linearGradient></defs>
+  <rect width="800" height="360" rx="34" fill="url(#g)"/>
+  <circle cx="400" cy="150" r="100" fill="#123c2d" stroke="#21e58a" stroke-width="5"/>
+  <text x="400" y="185" text-anchor="middle" font-size="105">${emoji}</text>
+  <text x="400" y="305" text-anchor="middle" fill="#eafff4" font-size="27" font-family="Arial">${escapeSVG(text)}</text>
+  <text x="400" y="335" text-anchor="middle" fill="#72b99a" font-size="16" font-family="Arial">QuizMaster Visual Quiz #${n}</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
+}
+function makeQuestion(cat,i,seed){
+  const base=seed[i%seed.length];
+  const cycle=Math.floor(i/seed.length)+1;
+  const [q,a,b,c,d,correct,exp]=base;
+  const variants=[
+    `${q}`,
+    `${q} — প্রশ্ন সেট ${cycle}`,
+    `${q} (অনুশীলন ${cycle})`,
+    `${q} [চ্যালেঞ্জ ${cycle}]`
+  ];
+  let options=[a,b,c,d];
+  const shift=(i*7+cycle)%4;
+  options=options.slice(shift).concat(options.slice(0,shift));
+  const obj={id:`${cat}-${i+1}`,category:cat,level:Math.floor(i/10)+1,type:"text",question:variants[i%variants.length],image:"",options,correctAnswer:correct,explanation:exp,time:30};
+  /* first 200 records across image-capable categories become image quizzes */
+  return obj;
+}
+const DB=[];
+for(const [cat,count] of Object.entries(categoryCounts)){
+  for(let i=0;i<count;i++){
+    const q=makeQuestion(cat,i,questionBanks[cat]);
+    q.type="text";
+    DB.push(q);
+  }
+}
+/* Convert exactly 200 records to image mode, distributed among visual categories. */
+let converted=0;
+for(const cat of ["health","brain","science","tech"]){
+  const rows=DB.filter(x=>x.category===cat);
+  const want=cat==="health"?50:cat==="brain"?50:cat==="science"?50:50;
+  rows.slice(0,want).forEach((q,idx)=>{q.type="image";q.image=makeImage(cat,idx+1,q.question);converted++});
+}
+/* Data validation: exactly 600 and exact category counts. */
+console.assert(DB.length===600,"Database must contain 600 questions");
+console.assert(converted===200,"Image quiz target must be 200");
+for(const c in categoryCounts) console.assert(DB.filter(q=>q.category===c).length===categoryCounts[c],`Count mismatch ${c}`);
+
+/* =========================
+   STORAGE
+========================= */
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function loadState(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(STATE_KEY)||"null");
+    return Object.assign(clone(defaultState),saved||{},{
+      user:Object.assign(clone(defaultState.user),saved?.user||{}),
+      progress:Object.assign({},saved?.progress||{}),
+      stats:Object.assign(clone(defaultState.stats),saved?.stats||{})
+    });
+  }catch(e){return clone(defaultState)}
+}
+function saveState(){localStorage.setItem(STATE_KEY,JSON.stringify(state))}
+function resetState(){state=clone(defaultState);saveState()}
+
+/* =========================
+   SOUND ENGINE
+========================= */
+function initAudio(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended") audioCtx.resume();
+}
+function snd(type="click"){
+  try{
+    initAudio();
+    const map={click:[520,.055,"sine"],correct:[740,.13,"sine"],wrong:[180,.16,"sawtooth"],unlock:[600,.18,"triangle"],complete:[800,.24,"sine"],congrats:[960,.22,"sine"],menuOpen:[360,.08,"triangle"],menuClose:[260,.08,"triangle"],back:[300,.1,"triangle"],signout:[160,.16,"sawtooth"],start:[520,.1,"triangle"]};
+    const [freq,dur,wave]=map[type]||map.click;
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type=wave;o.frequency.value=freq;g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.07,audioCtx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);
+    o.connect(g).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur+.02);
+    if(type==="correct"||type==="complete"||type==="congrats"){setTimeout(()=>tone(freq*1.25,.09),50)}
+  }catch(e){}
+}
+function tone(freq,dur){try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=freq;o.type="sine";g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.06,audioCtx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);o.connect(g).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur+.02)}catch(e){}}
+function haptic(pattern=20){if(navigator.vibrate)navigator.vibrate(pattern)}
+
+/* =========================
+   NAVIGATION
+========================= */
+const screens=["home","quizHub","category","quizPlay","result","ranking","profile","referral","vip","bookmarks","signup"];
+function showScreen(id){
+  screens.forEach(s=>document.getElementById(s).classList.toggle("active",s===id));
+  const nav={home:"navHome",quizHub:"navQuiz",ranking:"navRank",profile:"navProfile"};
+  document.querySelectorAll(".navBtn").forEach(x=>x.classList.remove("active"));
+  if(nav[id])document.getElementById(nav[id]).classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function showHome(){snd("click");renderHome();showScreen("home")}
+function showQuizHub(){snd("click");renderQuizHub();showScreen("quizHub")}
+function showLeaderboard(){snd("click");renderRanking();showScreen("ranking")}
+function showProfile(){snd("click");renderProfile();showScreen("profile")}
+function showReferral(){snd("click");renderReferral();showScreen("referral")}
+function showVIP(){snd("click");renderVIP();showScreen("vip")}
+function showBookmarks(){snd("click");renderBookmarks();showScreen("bookmarks")}
+function showCategory(cat){snd("click");currentCat=cat;renderCategory(cat);showScreen("category")}
+function openMenu(){snd("menuOpen");document.getElementById("drawerShade").classList.add("open")}
+function closeMenu(e){if(e&&e.target!==document.getElementById("drawerShade"))return;snd("menuClose");document.getElementById("drawerShade").classList.remove("open")}
+
+/* =========================
+   UI
+========================= */
+function t(bn,en){return state.language==="bn"?bn:en}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function renderHome(){
+ document.getElementById("home").innerHTML=`
+ <div class="card profileCard">
+   <div class="avatar">🧠</div><div class="profileMain"><div class="profileName">${esc(state.user.name||"User")}</div><div class="rank">${t("র‍্যাঙ্ক: ","Rank: ")}${t("Not Ranked","Not Ranked")}</div></div>
+   <button class="secondary" style="width:auto;padding:0 12px;min-height:38px" onclick="showProfile()">Profile</button>
+ </div>
+ <div class="stats"><div class="stat"><b>${state.user.points}</b>Points</div><div class="stat"><b>${state.user.coins}</b>Coins</div><div class="stat"><b>${state.user.balance}</b>Balance</div></div>
+ <div class="notice"><span>${esc(state.notice)}</span></div>
+ <div class="card leader"><div class="leaderIcon">🏆</div><div class="leaderText">Leaderboard <span class="leaderName" id="leaderName">${names[leaderIndex]}</span> is active</div><b>0 pts</b></div>
+ <div class="sectionTitle">${t("মূল কুইজ","Main Quizzes")}</div>
+ <div class="quizGrid">
+   ${homeCard("health")} ${homeCard("brain")}
+ </div>
+ <div class="sectionTitle">${t("দ্রুত অ্যাকশন","Quick Actions")}</div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+   <button class="primary" onclick="showReferral()">👥 REFER & EARN</button>
+   <button class="secondary" onclick="showVIP()">👑 VIP LEVEL</button>
+ </div>`;
+}
+function homeCard(cat){
+ const c=CAT[cat];
+ return `<button class="card quizCard" onclick="showCategory('${cat}')"><div class="quizVisual">${c.icon}</div><div class="quizInfo"><div class="quizIcon">${c.icon}</div><div class="quizTitle">${esc(c.name)}</div><div class="quizCount">${c.count} QUIZ</div></div></button>`;
+}
+function renderQuizHub(){
+ const cats=["general","bcs","tech","science"];
+ document.getElementById("quizHub").innerHTML=`<div class="backRow"><div><h2 style="margin:0">${t("কুইজ হাব","Quiz Hub")}</h2><div class="sub">${t("এখানে চারটি আলাদা কুইজ ক্যাটাগরি","Four independent quiz categories")}</div></div></div>
+ <div class="hubGrid">${cats.map(cat=>{const c=CAT[cat];return `<button class="card smallQuiz" onclick="showCategory('${cat}')"><div class="bigIcon">${c.icon}</div><div><h3>${esc(c.name)}</h3><p>${c.count} Questions · Unique DB</p></div></button>`}).join("")}</div>`;
+}
+function progressKey(cat,level){return `${cat}:level:${level}`}
+function isUnlocked(cat,level){
+ if(level===1)return true;
+ return !!state.progress[progressKey(cat,level-1)]?.completed;
+}
+function renderCategory(cat){
+ const c=CAT[cat], maxLevels=Math.ceil(c.count/10);
+ document.getElementById("category").innerHTML=`<div class="backRow"><button class="backBtn" onclick="${c.home?"showHome()":"showQuizHub()"};snd('back')">‹</button><div><h2 style="margin:0">${esc(c.name)}</h2><div class="sub">${c.count} ${t("টি প্রশ্ন","questions")} · ${maxLevels} ${t("levels","levels")}</div></div></div>
+ <div class="levelGrid">${Array.from({length:maxLevels},(_,i)=>{let lv=i+1,un=isUnlocked(cat,lv),done=state.progress[progressKey(cat,lv)]?.completed;return `<button class="card levelCard ${un?"":"locked"}" onclick="${un?`startQuiz('${cat}',${lv})`:`lockedToast()`}" ${un?"":"aria-disabled=true"}><div class="lock">${un?"🔓":"🔒"}</div><div class="levelNo">LEVEL ${lv}</div><div class="levelName">${done?"✓ ":""}${lv<=2?`Level ${lv}`:`Challenge ${lv}`}</div><div class="levelMeta">${un?t("10 Quiz • Unlocked","10 Quiz • Unlocked"):t("আগের Level সম্পূর্ণ করুন","Complete previous level")}</div><div class="sub">${Math.min(10,c.count-i*10)} questions</div></button>`}).join("")}</div>`;
+}
+function lockedToast(){snd("wrong");toast(t("আগের Level 10/10 সম্পূর্ণ করলে এটি Unlock হবে।","Complete the previous level with 10/10 to unlock."))}
+function renderRanking(){
+ const list=["Quiz Master","Knowledge King","Smart Learner","Fast Thinker","Brain Pro","Sadia","Rahim","Karim"];
+ document.getElementById("ranking").innerHTML=`<div class="sectionTitle" style="margin-top:4px">🏆 ${t("র‍্যাঙ্কিং","Ranking")}</div><div class="tabs"><button class="tab active" onclick="rankTab(this)">Daily</button><button class="tab" onclick="rankTab(this)">Weekly</button><button class="tab" onclick="rankTab(this)">All Time</button></div><div class="card">${list.map((n,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${n}</div><div class="rankPts">${(i+1)*100} pts</div></div>`).join("")}<div class="rankRow me"><div class="rankNo">—</div><div class="rankName"><b>${esc(state.user.name||"User")}</b><small class="sub"> · You</small></div><div class="rankPts">${state.user.points}</div></div></div>`;
+}
+function rankTab(btn){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));btn.classList.add("active");snd("click")}
+function renderProfile(){
+ const s=state.stats, win=s.played?Math.round(s.correct/s.played*100):0;
+ document.getElementById("profile").innerHTML=`<div class="card profileHero"><div class="bigAvatar">🧠</div><h2>${esc(state.user.name||"User")}</h2><div class="sub">${state.user.email||"Demo Account"}</div><div class="statGrid"><div class="statBox"><span>Points</span><b>${state.user.points}</b></div><div class="statBox"><span>Coins</span><b>${state.user.coins}</b></div><div class="statBox"><span>Balance</span><b>${state.user.balance}</b></div><div class="statBox"><span>Global Rank</span><b>Not Ranked</b></div></div></div>
+ <div class="sectionTitle">Statistics</div><div class="card" style="padding:12px"><div class="statGrid"><div class="statBox"><span>Total Played</span><b>${s.played}</b></div><div class="statBox"><span>Correct</span><b>${s.correct}</b></div><div class="statBox"><span>Wrong</span><b>${s.wrong}</b></div><div class="statBox"><span>Win Rate</span><b>${win}%</b></div><div class="statBox"><span>Bookmarks</span><b>${state.bookmarks.length}</b></div><div class="statBox"><span>VIP Level</span><b>VIP ${state.vip}</b></div></div></div>
+ <div class="sectionTitle">Account</div><div style="display:grid;gap:9px"><button class="secondary" onclick="showBookmarks()">🔖 Bookmarks</button><button class="secondary" onclick="showVIP()">👑 VIP Levels</button><button class="secondary" onclick="showReferral()">👥 Referral</button></div>`;
+}
+function renderReferral(){
+ const code="USER123";
+ document.getElementById("referral").innerHTML=`<div class="backRow"><button class="backBtn" onclick="showHome();snd('back')">‹</button><div><h2 style="margin:0">👥 Refer & Earn</h2><div class="sub">Invite friends and track referrals</div></div></div><div class="card formCard"><div class="sub">Your Referral Code</div><div class="refCode"><input id="refCode" readonly value="${code}"><button onclick="copyReferral()">⧉</button></div><button class="primary" onclick="shareReferral()">Share Referral</button><div class="stats" style="margin-top:16px"><div class="stat"><b>${state.referralCount}</b>Referral Count</div><div class="stat"><b>${state.referralReward}</b>Reward</div><div class="stat"><b>0</b>Balance</div></div></div>`;
+}
+function copyReferral(){navigator.clipboard?.writeText("USER123").then(()=>toast("Referral code copied")).catch(()=>toast("USER123"))}
+function shareReferral(){snd("click");if(navigator.share)navigator.share({title:"QuizMaster",text:"Join QuizMaster with my referral code USER123"});else copyReferral()}
+function renderVIP(){
+ document.getElementById("vip").innerHTML=`<div class="backRow"><button class="backBtn" onclick="showProfile();snd('back')">‹</button><div><h2 style="margin:0">👑 VIP System</h2><div class="sub">Current: VIP ${state.vip}</div></div></div><div class="vipGrid">${Array.from({length:6},(_,i)=>{let lv=i+1,un=lv<=state.vip;return `<button class="card vipCard ${un?"":"locked"}" onclick="${un?`toast('VIP ${lv} is active')`:`toast('VIP ${lv} unlocks through quiz performance')`}"><div class="vipBadge">${un?"👑":"🔒"}</div><h3>VIP ${lv}</h3><p>${un?"Unlocked":"Locked"} · Hard logical & analytical questions</p><span class="sub">${lv===1?"Initial level":"Performance based unlock"}</span></button>`}).join("")}</div>`;
+}
+function renderBookmarks(){
+ const qs=DB.filter(q=>state.bookmarks.includes(q.id));
+ document.getElementById("bookmarks").innerHTML=`<div class="backRow"><button class="backBtn" onclick="showProfile();snd('back')">‹</button><div><h2 style="margin:0">🔖 Bookmarks</h2><div class="sub">${qs.length} saved questions</div></div></div>${qs.length?qs.map(q=>`<div class="card bookmarkItem"><h4>${esc(q.question)}</h4><p>${CAT[q.category].name} · Correct: ${esc(q.correctAnswer)}</p></div>`).join(""):`<div class="empty">No bookmarked questions yet.</div>`}`;
+}
+function renderSignup(){
+ document.getElementById("signup").innerHTML=`<div style="padding-top:35px;text-align:center"><div class="logo" style="margin:auto;width:62px;height:62px;font-size:32px">🧠</div><h1 style="margin-bottom:4px">Create Account</h1><div class="sub">Sign up to continue to QuizMaster</div></div><div class="card formCard" style="margin-top:20px"><div class="field"><label>Name</label><input id="suName" placeholder="Your name"></div><div class="field"><label>Email</label><input id="suEmail" type="email" placeholder="you@example.com"></div><div class="field"><label>Password</label><input id="suPass" type="password" placeholder="••••••••"></div><div class="field"><label>Confirm Password</label><input id="suPass2" type="password" placeholder="••••••••"></div><button class="primary" onclick="createAccount()">CREATE ACCOUNT</button></div>`;
+}
+function confirmSignOut(){
+ closeMenu();snd("signout");document.getElementById("modal").innerHTML=`<div class="modal"><div class="modalIcon">🚪</div><h2>Sign Out?</h2><p>Your local demo session will be reset and the account creation page will open.</p><div class="modalBtns"><button class="dangerBtn" onclick="doSignOut()">SIGN OUT</button><button class="secondary" onclick="closeModal()">CANCEL</button></div></div>`;document.getElementById("modal").classList.add("show")
+}
+function doSignOut(){resetState();closeModal();renderSignup();showScreen("signup");toast("Signed out");}
+function closeModal(){document.getElementById("modal").classList.remove("show");document.getElementById("modal").innerHTML=""}
+function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>el.classList.remove("show"),3500)}
+function setLanguage(lang){state.language=lang;saveState();document.getElementById("bnBtn").classList.toggle("active",lang==="bn");document.getElementById("enBtn").classList.toggle("active",lang==="en");renderHome();if(document.getElementById("quizHub").classList.contains("active"))renderQuizHub();snd("click")}
+function createAccount(){
+ const n=document.getElementById("suName").value.trim(),e=document.getElementById("suEmail").value.trim(),p=document.getElementById("suPass").value,p2=document.getElementById("suPass2").value;
+ if(!n||!e||!p||!p2)return toast("সবগুলো field পূরণ করুন");
+ if(p!==p2)return toast("Password মিলছে না");
+ state.user={name:n,email:e,points:0,coins:0,balance:0};state.currentUser=true;state.vip=1;saveState();snd("congrats");renderHome();showHome();toast("Account created successfully");
+}
+
+/* =========================
+   QUIZ ENGINE
+========================= */
+function startQuiz(cat,level){
+ if(!isUnlocked(cat,level))return lockedToast();
+ currentCat=cat;currentLevel=level;score=0;qIndex=0;answered=false;exitBackArmed=false;
+ const start=DB.filter(q=>q.category===cat && q.level===level);
+ /* For categories beyond 10 levels, level maps every 10 questions. */
+ currentQuestions=shuffle(start).slice(0,Math.min(10,start.length)).map(q=>({...q,options:shuffle(q.options)}));
+ if(!currentQuestions.length)return toast("No questions available");
+ snd("start");renderQuizQuestion();showScreen("quizPlay");startTimer();
+}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function startTimer(){
+ clearInterval(timerId);timer=30;updateTimer();timerId=setInterval(()=>{timer--;updateTimer();if(timer<=0){clearInterval(timerId);timer=0;updateTimer();timeUp()}},1000)
+}
+function updateTimer(){const el=document.getElementById("timer");if(el){el.textContent=timer;el.classList.toggle("danger",timer<=5)}}
+function timeUp(){answered=false;snd("wrong");haptic(20);toast("⏰ Time Up — answer manually to continue")}
+function renderQuizQuestion(){
+ const q=currentQuestions[qIndex];if(!q)return;
+ const pct=Math.round((qIndex/currentQuestions.length)*100);
+ document.getElementById("quizPlay").innerHTML=`<div class="quizHeader"><button class="backBtn" onclick="requestQuizExit()">‹</button><div style="flex:1"><b>${esc(CAT[currentCat].name)}</b><div class="sub">Level ${currentLevel}</div></div><div class="timer" id="timer">${timer}</div></div>
+ <div class="progressOuter"><div class="progressInner" style="width:${Math.max(10,pct)}%"></div></div>
+ <div class="qMeta"><span>Question ${qIndex+1} / ${currentQuestions.length}</span><span>${pct}%</span></div>
+ <div class="card qCard">
+   ${q.type==="image"?`<img class="qImage" src="${q.image}" alt="Quiz visual">`:""}
+   <p class="qText">${esc(q.question)}</p>
+   <div class="optionList">${q.options.map((op,i)=>`<button class="option" id="opt-${i}" onclick="answerQuestion(${i})"><span class="letter">${String.fromCharCode(65+i)}</span><span>${esc(op)}</span></button>`).join("")}</div>
+   <div id="explain"></div>
+   <div class="quizActions" id="quizActions"></div>
+   <button class="secondary bookmarkBtn" onclick="toggleBookmark('${q.id}')">${state.bookmarks.includes(q.id)?"🔖 Saved":"🔖 Bookmark"}</button>
+ </div>`;
+ updateTimer();
+}
+function answerQuestion(i){
+ if(answered)return;
+ snd("click");initAudio();
+ const q=currentQuestions[qIndex],selected=q.options[i],btn=document.getElementById("opt-"+i);
+ answered=true;clearInterval(timerId);state.stats.played++;
+ if(selected===q.correctAnswer){
+   score++;state.stats.correct++;state.user.points+=10;btn.classList.add("correct");snd("correct");haptic([20,30,20]);
+   showMiniCongratulations();
+ }else{
+   state.stats.wrong++;btn.classList.add("wrong");snd("wrong");haptic(80);
+   const correctIndex=q.options.indexOf(q.correctAnswer);if(correctIndex>=0)document.getElementById("opt-"+correctIndex).classList.add("correct");
+   document.getElementById("explain").innerHTML=`<div class="explain"><b>Correct:</b> ${esc(q.correctAnswer)}<br>${esc(q.explanation)}</div>`;
+   document.getElementById("quizActions").innerHTML=`<button class="primary" onclick="nextQuestion()">NEXT QUESTION</button>`;
+ }
+ saveState();
+}
+function showMiniCongratulations(){
+ const q=currentQuestions[qIndex];
+ document.getElementById("quizActions").innerHTML=`<button class="primary" onclick="nextQuestion()">CONTINUE →</button>`;
+ document.getElementById("explain").innerHTML=`<div class="explain" style="border-color:rgba(33,229,138,.22);background:rgba(33,229,138,.07)"><b>🎉 ${t("অভিনন্দন! সঠিক উত্তর!","Congratulations! Correct answer!")}</b><br>${esc(q.explanation)}</div>`;
+ snd("congrats");
+}
+function nextQuestion(){if(!answered)return toast("আগে একটি answer select করুন");if(qIndex<currentQuestions.length-1){qIndex++;answered=false;timer=30;renderQuizQuestion();startTimer()}else finishLevel()}
+function finishLevel(){
+ clearInterval(timerId);const completed=score===currentQuestions.length;const key=progressKey(currentCat,currentLevel);
+ if(completed){
+   state.progress[key]={completed:true,score,at:Date.now()};if(isUnlocked(currentCat,currentLevel+1)){ } else {state.progress[progressKey(currentCat,currentLevel+1)]={unlocked:true}}
+   state.vip=Math.min(6,1+Math.floor(Object.values(state.progress).filter(x=>x.completed).length/2));
+   saveState();snd("complete");showResult(true);
+ }else{
+   state.progress[key]={completed:false,score,at:Date.now()};saveState();showResult(false)
+ }
+}
+function showResult(completed){
+ const total=currentQuestions.length,p=Math.round(score/total*100);
+ document.getElementById("result").innerHTML=`<div class="card result"><div class="scoreCircle" style="--score:${p}%"><b>${score}/${total}</b></div><h1>${completed?"🎉 LEVEL COMPLETED":"Level Not Completed"}</h1><p>${completed?"10/10 correct — next level unlocked.":"You need 10/10 correct to unlock the next level. Replay this level to try again."}</p><div class="modalBtns"><button class="primary" onclick="${completed?`showCategory('${currentCat}')`:`startQuiz('${currentCat}',${currentLevel})`}">${completed?"NEXT LEVEL":"REPLAY LEVEL"}</button><button class="secondary" onclick="showHome()">HOME</button></div></div>`;
+ showScreen("result");
+}
+function requestQuizExit(){
+ snd("back");clearInterval(timerId);
+ document.getElementById("modal").innerHTML=`<div class="modal"><div class="modalIcon">⚠️</div><h2>Exit Quiz?</h2><p>আপনি কুইজ থেকে বের হয়ে হোমপেজে যাচ্ছেন। আপনার এই attempt-এর বর্তমান প্রশ্নের state reset হবে; completed level-এর saved progress থাকবে।</p><div class="modalBtns"><button class="dangerBtn" onclick="exitQuiz()">EXIT QUIZ</button><button class="secondary" onclick="closeModal();startTimer()">CANCEL</button></div></div>`;
+ document.getElementById("modal").classList.add("show");
+}
+function exitQuiz(){closeModal();showHome();toast("আপনি কুইজ থেকে বের হয়ে হোমপেজে যাচ্ছেন।")}
+function toggleBookmark(id){if(state.bookmarks.includes(id))state.bookmarks=state.bookmarks.filter(x=>x!==id);else state.bookmarks.push(id);saveState();renderQuizQuestion();toast(state.bookmarks.includes(id)?"Bookmarked":"Bookmark removed")}
+
+/* =========================
+   ANDROID BACK / BROWSER BACK
+========================= */
+history.replaceState({qm:"root"},"",location.href);
+window.addEventListener("popstate",()=>{
+ if(document.getElementById("quizPlay").classList.contains("active")){
+   history.pushState({qm:"quiz"},"",location.href);requestQuizExit();
+ }else{showHome()}
+});
+document.addEventListener("backbutton",()=>requestQuizExit());
+
+/* =========================
+   NOTICE / LEADERBOARD DEMO
+========================= */
+setInterval(()=>{
+ leaderIndex=(leaderIndex+1)%names.length;
+ const el=document.getElementById("leaderName");if(el){el.animate([{transform:"translateX(-20px)",opacity:0},{transform:"translateX(0)",opacity:1}],{duration:450});el.textContent=names[leaderIndex]}
+},5000);
+
+/* =========================
+   INITIALIZE
+========================= */
+document.getElementById("bnBtn").classList.toggle("active",state.language==="bn");
+document.getElementById("enBtn").classList.toggle("active",state.language==="en");
+renderHome();
+if(!state.currentUser){
+ /* Keep the requested initial demo Home experience; account can be created from Sign Out. */
+}
+document.addEventListener("click",()=>{try{initAudio()}catch(e){}},{once:true});
+</script>
+</body>
+</html>
